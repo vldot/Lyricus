@@ -1,0 +1,14 @@
+{
+  "name": "lyrics-app",
+  "version": "1.0.0",
+  "main": "main.js",
+  "scripts": {
+    "start": "electron ."
+  },
+  "devDependencies": {
+    "electron": "^30.0.6"
+  },
+  "dependencies": {
+    "express": "^4.19.2"
+  }
+}
