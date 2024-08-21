@@ -17,7 +17,7 @@
             background-color: black;
             height: 100vh;
         }
-        #title {
+        #songTitle {
             font-size: 24px;
             font-weight: 700;
             margin-bottom: 10px;
@@ -55,7 +55,7 @@
             to { transform: translateY(-100%); }
         }
         @media (max-width: 768px) {
-            #title {
+            #songTitle {
                 font-size: 20px;
             }
             #artist {
@@ -69,7 +69,7 @@
             }
         }
         @media (max-width: 480px) {
-            #title {
+            #songTitle {
                 font-size: 18px;
             }
             #artist {
@@ -85,7 +85,7 @@
     </style>
 </head>
 <body>
-    <div id="title">Song Title</div>
+    <div id="songTitle">Song Title</div>
     <div id="artist">Artist Name</div>
     <div id="lyrics-container">
         <div id="lyrics">
@@ -130,17 +130,62 @@
                 console.error('Failed to fetch currently playing song:', response.statusText);
                 return null;
             }
-            const data = await response.json();
-            return data;
+            
+            try {
+                const data = await response.json();
+                return data;
+            } catch (error) {
+                console.error('Error parsing JSON:', error);
+                return null;
+            }
         }
 
-        function updateUI(songData) {
+        async function searchTrackId(songTitle, artist) {
+            const response = await fetch(`https://api.spotify.com/v1/search?q=track:${encodeURIComponent(songTitle)}%20artist:${encodeURIComponent(artist)}&type=track&limit=1`, {
+                headers: {
+                    'Authorization': `Bearer ${token}`
+                }
+            });
+            if (!response.ok) {
+                console.error('Failed to search track:', response.statusText);
+                return null;
+            }
+            const data = await response.json();
+            if (data.tracks.items.length > 0) {
+                return data.tracks.items[0].id;
+            }
+            return null;
+        }
+
+        async function fetchLyrics(trackId) {
+            const response = await fetch(`http://localhost:3001/v1/lyrics/${trackId}`);
+            if (!response.ok) {
+                console.error('Failed to fetch lyrics:', response.statusText);
+                return 'Ahh lyrics not found';
+            }
+            const data = await response.json();
+            return data.lyrics ? data.lyrics.lines.map(line => line.words).join('\n') : 'Lyrics not available';
+        }
+
+        async function updateUI(songData) {
             if (songData && songData.item) {
-                document.getElementById('title').innerText = songData.item.name;
-                document.getElementById('artist').innerText = songData.item.artists.map(artist => artist.name).join(', ');
+                const songTitle = songData.item.name;
+                const artist = songData.item.artists.map(artist => artist.name).join(', ');
+
+                document.getElementById('songTitle').innerText = songTitle;
+                document.getElementById('artist').innerText = artist;
+
+                const trackId = await searchTrackId(songTitle, artist);
+                if (trackId) {
+                    const lyrics = await fetchLyrics(trackId);
+                    document.getElementById('lyrics').innerHTML = lyrics.split('\n').join('<br>');
+                } else {
+                    document.getElementById('lyrics').innerHTML = 'Lyrics not found';
+                }
             } else {
-                document.getElementById('title').innerText = 'No song currently playing';
+                document.getElementById('songTitle').innerText = 'No song currently playing';
                 document.getElementById('artist').innerText = '';
+                document.getElementById('lyrics').innerHTML = 'Lyrics go here...';
             }
         }
 
@@ -148,8 +193,8 @@
             const songData = await fetchCurrentSong(token);
             updateUI(songData);
         }
+
         updateSongInfo();
-        
         setInterval(updateSongInfo, 10000);
     </script>
 </body>
