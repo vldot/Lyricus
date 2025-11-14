@@ -1,14 +1,19 @@
 {
-  "name": "lyrics-app",
+  "name": "lyricus",
   "version": "1.0.0",
+  "description": "Time-synced lyrics viewer for Spotify",
   "main": "main.js",
   "scripts": {
-    "start": "electron ."
+    "start": "electron .",
+    "lyricus-api": "node lyricus-server.js",
+    "oauth-server": "node server.js"
   },
   "devDependencies": {
     "electron": "^30.0.6"
   },
   "dependencies": {
+    "cors": "^2.8.5",
+    "dotenv": "^17.2.3",
     "express": "^4.19.2"
   }
 }

@@ -3,199 +3,443 @@
 <head>
     <meta charset="UTF-8">
     <title>Lyricus</title>
-    <link href="https://fonts.googleapis.com/css2?family=Poppins:wght@400;500&display=swap" rel="stylesheet">
+    <link href="https://fonts.googleapis.com/css2?family=Poppins:wght@300;400;500;600;700&display=swap" rel="stylesheet">
     <style>
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+
         body {
             font-family: 'Poppins', sans-serif;
+            background: linear-gradient(135deg, #1e1e1e 0%, #0a0a0a 100%);
+            color: #fff;
             overflow: hidden;
-            margin: 0;
-            padding: 20px;
+            height: 100vh;
             display: flex;
             flex-direction: column;
-            align-items: center;
-            justify-content: flex-start;
-            background-color: black;
+            -webkit-app-region: drag;
+        }
+
+        .container {
+            display: flex;
+            flex-direction: column;
             height: 100vh;
+            padding: 20px;
         }
+
+        /* Header - Song Info */
+        .song-info {
+            text-align: center;
+            margin-bottom: 15px;
+            -webkit-app-region: no-drag;
+        }
+
+        #albumArt {
+            width: 120px;
+            height: 120px;
+            border-radius: 12px;
+            margin: 0 auto 15px;
+            box-shadow: 0 8px 24px rgba(0, 0, 0, 0.5);
+            object-fit: cover;
+            background: #2a2a2a;
+        }
+
         #songTitle {
-            font-size: 24px;
-            font-weight: 700;
-            margin-bottom: 10px;
+            font-size: 18px;
+            font-weight: 600;
+            margin-bottom: 5px;
             color: #fff;
-        }
-        #artist {
-            font-size: 20px;
-            font-weight: 400;
-            margin-bottom: 20px;
-            color: #fff;
-        }
-        #lyrics-container {
-            position: relative;
-            width: 80%;
-            height: 70%;
+            white-space: nowrap;
             overflow: hidden;
+            text-overflow: ellipsis;
+            padding: 0 10px;
         }
-        #lyrics {
-            position: absolute;
-            font-weight: 500;
-            font-size: 24px;
-            color: #fff;
-            animation: scroll 15s linear infinite;
+
+        #artist {
+            font-size: 14px;
+            font-weight: 400;
+            color: #b3b3b3;
+            white-space: nowrap;
+            overflow: hidden;
+            text-overflow: ellipsis;
+            padding: 0 10px;
         }
-        #gradient-overlay {
-            position: absolute;
-            top: 0;
+
+        /* Minimal Progress Bar */
+        .progress-container {
+            margin: 10px 0;
+            -webkit-app-region: no-drag;
+        }
+
+        .progress-bar {
             width: 100%;
-            height: 20%;
-            background: linear-gradient(to top, rgba(0, 0, 0, 0) 0%, rgb(0, 0, 0) 100%);
-            pointer-events: none;
+            height: 3px;
+            background: #404040;
+            border-radius: 2px;
         }
-        @keyframes scroll {
-            from { transform: translateY(100%); }
-            to { transform: translateY(-100%); }
+
+        .progress-fill {
+            height: 100%;
+            background: #1db954;
+            border-radius: 2px;
+            width: 0%;
+            transition: width 0.1s linear;
         }
-        @media (max-width: 768px) {
-            #songTitle {
-                font-size: 20px;
+
+        /* Lyrics Container */
+        .lyrics-container {
+            flex: 1;
+            overflow-y: auto;
+            overflow-x: hidden;
+            padding: 20px 10px;
+            position: relative;
+            -webkit-app-region: no-drag;
+            scrollbar-width: thin;
+            scrollbar-color: #404040 transparent;
+        }
+
+        .lyrics-container::-webkit-scrollbar {
+            width: 6px;
+        }
+
+        .lyrics-container::-webkit-scrollbar-track {
+            background: transparent;
+        }
+
+        .lyrics-container::-webkit-scrollbar-thumb {
+            background: #404040;
+            border-radius: 3px;
+        }
+
+        .lyrics-container::-webkit-scrollbar-thumb:hover {
+            background: #555;
+        }
+
+        /* Lyrics Lines */
+        .lyric-line {
+            font-size: 18px;
+            font-weight: 400;
+            color: #666;
+            padding: 8px 0;
+            transition: all 0.3s ease;
+            text-align: center;
+            line-height: 1.6;
+        }
+
+        .lyric-line.active {
+            color: #fff;
+            font-weight: 600;
+            font-size: 22px;
+            transform: scale(1.05);
+        }
+
+        .lyric-line.past {
+            color: #888;
+        }
+
+        /* Status Messages */
+        .status-message {
+            text-align: center;
+            color: #666;
+            font-size: 16px;
+            padding: 40px 20px;
+        }
+
+        .lyrics-source {
+            text-align: center;
+            font-size: 10px;
+            color: #444;
+            margin-top: 10px;
+            padding: 5px;
+        }
+
+        /* Loading Animation */
+        .loading {
+            text-align: center;
+            padding: 20px;
+        }
+
+        .loading::after {
+            content: '...';
+            animation: dots 1.5s steps(4, end) infinite;
+        }
+
+        @keyframes dots {
+            0%, 20% { content: '.'; }
+            40% { content: '..'; }
+            60%, 100% { content: '...'; }
+        }
+
+        @media (max-width: 480px) {
+            #albumArt {
+                width: 100px;
+                height: 100px;
             }
-            #artist {
+
+            #songTitle {
                 font-size: 16px;
             }
-            #lyrics {
-                font-size: 20px;
-            }
-            #lyrics-container {
-                width: 90%;
-            }
-        }
-        @media (max-width: 480px) {
-            #songTitle {
-                font-size: 18px;
-            }
+
             #artist {
-                font-size: 14px;
+                font-size: 12px;
             }
-            #lyrics {
-                font-size: 18px;
+
+            .lyric-line {
+                font-size: 16px;
             }
-            #lyrics-container {
-                width: 95%;
+
+            .lyric-line.active {
+                font-size: 20px;
             }
         }
     </style>
 </head>
 <body>
-    <div id="songTitle">Song Title</div>
-    <div id="artist">Artist Name</div>
-    <div id="lyrics-container">
-        <div id="lyrics">
-            Lyrics go here...
-            <br>Line 1
-            <br>Line 2
-            <br>Line 3
-            <br>...
-            <br>Lorem ipsum dolor sit amet consectetur adipisicing elit.
-            <br>Quidem eligendi autem laudantium nostrum aliquid officia 
-            <br>sequi voluptatibus aspernatur, natus quo libero fuga, voluptates vero quisquam facere 
-            <br>perferendis adipisci ea itaque.
+    <div class="container">
+        <!-- Song Info -->
+        <div class="song-info">
+            <img id="albumArt" src="" alt="Album Art" style="display: none;">
+            <div id="songTitle">Lyricus</div>
+            <div id="artist">Waiting for playback...</div>
         </div>
-        <div id="gradient-overlay"></div>
+
+        <!-- Minimal Progress Indicator -->
+        <div class="progress-container">
+            <div class="progress-bar">
+                <div class="progress-fill" id="progressFill"></div>
+            </div>
+        </div>
+
+        <!-- Lyrics -->
+        <div class="lyrics-container" id="lyricsContainer">
+            <div class="status-message">Play a song on Spotify to see lyrics</div>
+        </div>
     </div>
+
     <script>
-        const clientId = '97d9dd31633f411780db21bfe001c5d4';
-        const redirectUri = 'http://localhost:3000/callback';
+        // ...existing code... (keep all the JavaScript logic exactly the same)
+        const clientId = '1f15ad302e5c49e8b095705c5fcf2016';
+        const redirectUri = 'http://127.0.0.1:3000/callback';
         const authEndpoint = 'https://accounts.spotify.com/authorize';
         const scopes = [
             'user-read-currently-playing',
-            'user-read-playback-state',
+            'user-read-playback-state'
         ];
+
+        const LYRICS_API = 'http://127.0.0.1:3001';
+        let currentTrackId = null;
+        let currentLyrics = null;
+        let isPlaying = false;
+        let progressMs = 0;
+        let durationMs = 0;
+        let updateInterval = null;
 
         function getAccessToken() {
             const token = localStorage.getItem('spotify_access_token');
+            console.log('Token from localStorage:', token ? `${token.substring(0, 20)}...` : 'NULL');
+            
             if (!token) {
-                window.location = `${authEndpoint}?client_id=${clientId}&redirect_uri=${redirectUri}&scope=${scopes.join('%20')}&response_type=token`;
+                const lastRedirect = localStorage.getItem('last_auth_redirect');
+                const now = Date.now();
+                if (lastRedirect && (now - parseInt(lastRedirect)) < 10000) {
+                    console.error('Too many auth redirects.');
+                    return null;
+                }
+                localStorage.setItem('last_auth_redirect', now.toString());
+                window.location = `${authEndpoint}?client_id=${clientId}&redirect_uri=${encodeURIComponent(redirectUri)}&scope=${encodeURIComponent(scopes.join(' '))}&response_type=code`;
+            } else {
+                localStorage.removeItem('last_auth_redirect');
             }
             return token;
         }
-
         const token = getAccessToken();
 
-        async function fetchCurrentSong(token) {
-            const response = await fetch('https://api.spotify.com/v1/me/player/currently-playing', {
-                headers: {
-                    'Authorization': `Bearer ${token}`
-                }
-            });
-            if (!response.ok) {
-                console.error('Failed to fetch currently playing song:', response.statusText);
-                return null;
-            }
-            
+        async function fetchCurrentSong() {
             try {
-                const data = await response.json();
-                return data;
+                const response = await fetch('https://api.spotify.com/v1/me/player/currently-playing', {
+                    headers: { 'Authorization': `Bearer ${token}` }
+                });
+
+                if (response.status === 401) {
+                    localStorage.removeItem('spotify_access_token');
+                    window.location.reload();
+                    return null;
+                }
+                if (!response.ok || response.status === 204) {
+                    return null;
+                }
+                return await response.json();
             } catch (error) {
-                console.error('Error parsing JSON:', error);
+                console.error('Error fetching current song:', error);
                 return null;
             }
         }
 
-        async function searchTrackId(songTitle, artist) {
-            const response = await fetch(`https://api.spotify.com/v1/search?q=track:${encodeURIComponent(songTitle)}%20artist:${encodeURIComponent(artist)}&type=track&limit=1`, {
-                headers: {
-                    'Authorization': `Bearer ${token}`
+        async function fetchLyrics(trackName, artistName, albumName, duration) {
+            try {
+                const params = new URLSearchParams({
+                    track: trackName,
+                    artist: artistName,
+                    duration: duration
+                });
+
+                if (albumName) {
+                    params.append('album', albumName);
+                }
+
+                const response = await fetch(`${LYRICS_API}/v1/lyrics?${params.toString()}`);
+
+                if (!response.ok) {
+                    return null;
+                }
+
+                return await response.json();
+            } catch (error) {
+                console.error('Error fetching lyrics:', error);
+                return null;
+            }
+        }
+
+        function formatTime(ms) {
+            const seconds = Math.floor(ms / 1000);
+            const mins = Math.floor(seconds / 60);
+            const secs = seconds % 60;
+            return `${mins}:${secs.toString().padStart(2, '0')}`;
+        }
+
+        function updateProgress() {
+            if (!isPlaying || durationMs === 0) return;
+
+            progressMs += 200;
+            if (progressMs > durationMs) {
+                progressMs = durationMs;
+            }
+
+            const percentage = (progressMs / durationMs) * 100;
+            document.getElementById('progressFill').style.width = percentage + '%';
+
+            if (currentLyrics && currentLyrics.synced) {
+                updateLyricsHighlight(progressMs / 1000);
+            }
+        }
+
+        function updateLyricsHighlight(currentTimeSeconds) {
+            if (!currentLyrics || !currentLyrics.synced) return;
+
+            const lines = currentLyrics.lines;
+            let currentIndex = -1;
+
+            for (let i = lines.length - 1; i >= 0; i--) {
+                if (lines[i].time <= currentTimeSeconds + 0.3) {
+                    currentIndex = i;
+                    break;
+                }
+            }
+
+            const lineElements = document.querySelectorAll('.lyric-line');
+            lineElements.forEach((el, idx) => {
+                el.classList.remove('active', 'past');
+                if (idx === currentIndex) {
+                    el.classList.add('active');
+                    el.scrollIntoView({ behavior: 'smooth', block: 'center' });
+                } else if (idx < currentIndex) {
+                    el.classList.add('past');
                 }
             });
-            if (!response.ok) {
-                console.error('Failed to search track:', response.statusText);
-                return null;
-            }
-            const data = await response.json();
-            if (data.tracks.items.length > 0) {
-                return data.tracks.items[0].id;
-            }
-            return null;
         }
 
-        async function fetchLyrics(trackId) {
-            const response = await fetch(`http://localhost:3001/v1/lyrics/${trackId}`);
-            if (!response.ok) {
-                console.error('Failed to fetch lyrics:', response.statusText);
-                return 'Ahh lyrics not found';
+        function displayLyrics(lyrics) {
+            const container = document.getElementById('lyricsContainer');
+ 
+            if (!lyrics) {
+                container.innerHTML = '<div class="status-message">Lyrics not found 😔</div>';
+                return;
             }
-            const data = await response.json();
-            return data.lyrics ? data.lyrics.lines.map(line => line.words).join('\n') : 'Lyrics not available';
+
+            if (lyrics.synced && lyrics.lines.length > 0) {
+                let html = '';
+                lyrics.lines.forEach((line, idx) => {
+                    html += `<div class="lyric-line" data-time="${line.time}">${line.text}</div>`;
+                });
+                html += `<div class="lyrics-source">Synced lyrics from LRClib</div>`;
+                container.innerHTML = html;
+            } else if (lyrics.lines && lyrics.lines.length > 0) {
+                let html = '';
+                lyrics.lines.forEach(line => {
+                    html += `<div class="lyric-line">${line.text}</div>`;
+                });
+                html += `<div class="lyrics-source">Lyrics from LRClib (not synced)</div>`;
+                container.innerHTML = html;
+            } else {
+                container.innerHTML = '<div class="status-message">Lyrics not available</div>';
+            }
         }
 
         async function updateUI(songData) {
-            if (songData && songData.item) {
-                const songTitle = songData.item.name;
-                const artist = songData.item.artists.map(artist => artist.name).join(', ');
+            if (!songData || !songData.item) {
+                document.getElementById('songTitle').textContent = 'Lyricus';
+                document.getElementById('artist').textContent = 'No song playing';
+                document.getElementById('albumArt').style.display = 'none';
+                document.getElementById('lyricsContainer').innerHTML = '<div class="status-message">Play a song on Spotify to see lyrics</div>';
+                isPlaying = false;
+                clearInterval(updateInterval);
+                return;
+            }
 
-                document.getElementById('songTitle').innerText = songTitle;
-                document.getElementById('artist').innerText = artist;
+            const trackId = songData.item.id;
+            const trackName = songData.item.name;
+            const artistName = songData.item.artists.map(a => a.name).join(', ');
+            const albumName = songData.item.album.name;
+            const albumArt = songData.item.album.images[0]?.url;
 
-                const trackId = await searchTrackId(songTitle, artist);
-                if (trackId) {
-                    const lyrics = await fetchLyrics(trackId);
-                    document.getElementById('lyrics').innerHTML = lyrics.split('\n').join('<br>');
-                } else {
-                    document.getElementById('lyrics').innerHTML = 'Lyrics not found';
-                }
-            } else {
-                document.getElementById('songTitle').innerText = 'No song currently playing';
-                document.getElementById('artist').innerText = '';
-                document.getElementById('lyrics').innerHTML = 'Lyrics go here...';
+            isPlaying = songData.is_playing;
+            progressMs = songData.progress_ms || 0;
+            durationMs = songData.item.duration_ms;
+
+            document.getElementById('songTitle').textContent = trackName;
+            document.getElementById('artist').textContent = artistName;
+
+            if (albumArt) {
+                const artElement = document.getElementById('albumArt');
+                artElement.src = albumArt;
+                artElement.style.display = 'block';
+            }
+
+            const percentage = (progressMs / durationMs) * 100;
+            document.getElementById('progressFill').style.width = percentage + '%';
+
+            if (trackId !== currentTrackId) {
+                currentTrackId = trackId;
+                document.getElementById('lyricsContainer').innerHTML = '<div class="loading">Loading lyrics</div>';
+
+                const lyrics = await fetchLyrics(trackName, artistName, albumName, durationMs);
+                currentLyrics = lyrics;
+                displayLyrics(lyrics);
+            }
+
+            if (currentLyrics && currentLyrics.synced) {
+                updateLyricsHighlight(progressMs / 1000);
+            }
+
+            if (isPlaying && !updateInterval) {
+                updateInterval = setInterval(updateProgress, 200);
+            } else if (!isPlaying && updateInterval) {
+                clearInterval(updateInterval);
+                updateInterval = null;
             }
         }
 
-        async function updateSongInfo() {
-            const songData = await fetchCurrentSong(token);
-            updateUI(songData);
-        }
+        if (token) {
+            async function updateSongInfo() {
+                const songData = await fetchCurrentSong();
+                await updateUI(songData);
+            }
 
-        updateSongInfo();
-        setInterval(updateSongInfo, 10000);
+            updateSongInfo();
+            setInterval(updateSongInfo, 5000);
+        }
     </script>
 </body>
 </html>

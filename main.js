@@ -3,15 +3,28 @@ const path = require('path');
 
 function createWindow() {
   const mainWindow = new BrowserWindow({
-    width: 400,
-    height: 800,
+    width: 420,
+    height: 850,
+    minWidth: 350,
+    minHeight: 600,
     webPreferences: {
-      preload: path.join(__dirname, 'preload.js')
+      preload: path.join(__dirname, 'preload.js'),
+      nodeIntegration: false,
+      contextIsolation: true
     },
-    alwaysOnTop: true
+    alwaysOnTop: true,
+    frame: true,
+    transparent: false,
+    backgroundColor: '#1e1e1e',
+    resizable: true,
+    title: 'Lyricus'
   });
 
-  mainWindow.loadFile('index.html');
+  // Load from Express server instead of file
+  mainWindow.loadURL('http://127.0.0.1:3000');
+
+  // Open DevTools for debugging
+  // mainWindow.webContents.openDevTools();
 }
 
 app.on('ready', createWindow);

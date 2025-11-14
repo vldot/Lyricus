@@ -4,20 +4,43 @@
     <meta charset="UTF-8">
     <title>Spotify Callback</title>
     <script>
-        const hash = window.location.hash.substring(1).split('&').reduce(function(initial, item) {
-            if (item) {
-                var parts = item.split('=');
-                initial[parts[0]] = decodeURIComponent(parts[1]);
-            }
-            return initial;
-        }, {});
+        // Get authorization code from URL
+        const params = new URLSearchParams(window.location.search);
+        const code = params.get('code');
+        const error = params.get('error');
 
-        localStorage.setItem('spotify_access_token', hash.access_token);
+        console.log('Callback received - code:', code, 'error:', error);
 
-        window.location.href = '/';
+        if (error) {
+            console.error('Auth error:', error);
+            document.body.innerHTML = `<div style="color:red;padding:20px;">Auth error: ${error}</div>`;
+        } else if (code) {
+            // Send code to backend to exchange for token
+            fetch('http://127.0.0.1:3000/api/token', {
+                method: 'POST',
+                headers: { 'Content-Type': 'application/json' },
+                body: JSON.stringify({ code })
+            })
+            .then(res => res.json())
+            .then(data => {
+                if (data.access_token) {
+                    localStorage.setItem('spotify_access_token', data.access_token);
+                    console.log('Token saved successfully');
+                    window.location.href = '/';
+                } else {
+                    throw new Error('No token in response');
+                }
+            })
+            .catch(err => {
+                console.error('Token exchange error:', err);
+                document.body.innerHTML = `<div style="color:red;padding:20px;">Token exchange failed: ${err.message}</div>`;
+            });
+        } else {
+            document.body.innerHTML = '<div style="color:red;padding:20px;">No authorization code received</div>';
+        }
     </script>
 </head>
 <body>
-    Redirecting...
+    <div style="color:white;padding:20px;text-align:center;">Processing authentication...</div>
 </body>
 </html>
